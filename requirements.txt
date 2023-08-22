@@ -1,0 +1,13 @@
+accelerate
+transformers
+safetensors
+opencv-python
+diffusers
+controlnet_aux
+matplotlib
+mediapipe
+rembg[gpu]
+omegaconf
+gdown
+boto3
+runpod
