@@ -1,5 +1,5 @@
 env/
 .env
-model/
+cache/
 .vscode
 **/__pycache__/

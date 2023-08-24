@@ -12,5 +12,5 @@ RUN git clone https://github.com/samarsheikh001/deepnu-serverless .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Run celery worker when the container launches
-CMD [ "python", "-u", "handler.py" ]
+# Run the application
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]

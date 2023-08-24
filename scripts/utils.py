@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from scripts.storage import download_file_from_s3
 from io import BytesIO
 import os
 import subprocess
@@ -9,13 +8,23 @@ from PIL import Image
 import requests
 
 from dotenv import load_dotenv
+
+from scripts.storage import download_file_from_bucket
 load_dotenv()
 
 
-CACHE_FOLDER = "model"
+CACHE_FOLDER = "cache"
 SEG_MODEL = "cloth_segm.pth"
-SD_MODEL_CACHE = "uber_inpainting.safetensors"
-SD_MODEL_URL = "https://deepnu.sfo3.digitaloceanspaces.com/uberRealisticPornMerge_urpmv13Inpainting.safetensors"
+SD_MODEL = "uber_inpainting.safetensors"
+UberVag_LORA = "UberVag_LORA_V1.0.safetensors"
+UberDatAss_LORA = "UberDatAss_LORA_V1.0.safetensors"
+UberRealVag_LORA = "UberRealVag_LORA_V1.0.safetensors"
+
+
+def ensure_model_exists(model_name):
+    model_path = os.path.join(CACHE_FOLDER, model_name)
+    if not os.path.exists(model_path):
+        download_file_from_bucket(model_name, model_path, bucket_name="models")
 
 
 def download_image(url):
@@ -25,15 +34,6 @@ def download_image(url):
 
 def load_image(path):
     return Image.open(path).convert("RGB")
-
-
-def setup():
-    os.makedirs(CACHE_FOLDER, exist_ok=True)
-    if not os.path.exists(f"{CACHE_FOLDER}/{SEG_MODEL}"):
-        download_file_from_s3(SEG_MODEL, f"{CACHE_FOLDER}/{SEG_MODEL}")
-    if not os.path.exists(f"{CACHE_FOLDER}/{SD_MODEL_CACHE}"):
-        download_file_from_s3(
-            SD_MODEL_CACHE, f"{CACHE_FOLDER}/{SD_MODEL_CACHE}")
 
 
 def download_weights(url, dest):

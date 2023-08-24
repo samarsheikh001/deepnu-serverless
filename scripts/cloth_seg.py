@@ -13,6 +13,7 @@ import torchvision.transforms as transforms
 
 from collections import OrderedDict
 from .options import opt
+from .utils import CACHE_FOLDER, SEG_MODEL
 
 
 def load_checkpoint(model, checkpoint_path):
@@ -199,7 +200,7 @@ if __name__ == '__main__':
     parser.add_argument('--cuda', action='store_true',
                         help='Enable CUDA (default: False)')
     parser.add_argument('--checkpoint_path', type=str,
-                        default='model/cloth_segm.pth', help='Path to the checkpoint file')
+                        default=f'{CACHE_FOLDER}/{SEG_MODEL}', help='Path to the checkpoint file')
     args = parser.parse_args()
 
     main(args)

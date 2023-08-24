@@ -11,3 +11,5 @@ omegaconf
 gdown
 boto3
 runpod
+fastapi
+uvicorn
