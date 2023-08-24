@@ -6,7 +6,7 @@ import os
 import torch
 from scripts.cloth_seg import get_clothes_mask
 
-from scripts.utils import CACHE_FOLDER, SD_MODEL_CACHE, download_image, setup
+from scripts.utils import CACHE_FOLDER, SD_MODEL_CACHE, dilate_mask, download_image, setup
 
 sleep_time = int(os.environ.get('SLEEP_TIME', 30))
 
@@ -32,7 +32,7 @@ negative_prompt = "((clothing)), (monochrome:1.3), (deformed, distorted, disfigu
 def handler(event):
     img_url = event['input']['image_url']
     image = download_image(img_url).resize((512, 512))
-    segmented_image = get_clothes_mask(image)
+    segmented_image = dilate_mask(get_clothes_mask(image), 15, 1)
 
     image = pipe(prompt=prompt, negative_prompt=negative_prompt,
                  image=image, mask_image=segmented_image).images[0]

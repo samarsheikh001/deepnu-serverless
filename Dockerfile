@@ -2,18 +2,15 @@ FROM pytorch/pytorch:latest
 
 WORKDIR /app
 
-RUN pip install runpod
-
-ADD handler.py .
-
 # Update system and install necessary system packages for git and wget
-RUN apt-get update && apt-get install -y git wget && rm -rf /var/lib/apt/lists/*
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y git wget python3-dev build-essential libgl1-mesa-glx
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 
 # Clone the repository
-RUN git clone -b run-dreambooth https://github.com/samarsheikh001/job_queue_template .
+RUN git clone https://github.com/samarsheikh001/deepnu-serverless .
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Run celery worker when the container launches
-CMD [ "python", "-u", "/handler.py" ]
+CMD [ "python", "-u", "handler.py" ]

@@ -1,1 +1,3 @@
 curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/download/v0.0.1/pget" && chmod +x /usr/local/bin/pget
+
+docker build --no-cache -t getrektx/deepless:latest .

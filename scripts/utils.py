@@ -1,3 +1,5 @@
+import cv2
+import numpy as np
 from scripts.storage import download_file_from_s3
 from io import BytesIO
 import os
@@ -40,3 +42,22 @@ def download_weights(url, dest):
     print("downloading to: ", dest)
     subprocess.check_call(["pget", "-x", url, dest])
     print("downloading took: ", time.time() - start)
+
+
+def dilate_mask(input_image, structure_size, iterations):
+    # Convert PIL image to OpenCV image (grayscale)
+    image = np.array(input_image.convert('L'))
+
+    # Define the structure for dilation
+    structure = np.ones((structure_size, structure_size), np.uint8)
+
+    # Apply dilation
+    image_dilated = cv2.dilate(image, structure, iterations=iterations)
+
+    # Save the result
+    cv2.imwrite("seg_dialated.png", image_dilated)
+
+    # Convert to PIL Image
+    image_pil = Image.fromarray(image_dilated)
+
+    return image_pil
