@@ -54,8 +54,8 @@ def dilate_mask(input_image, structure_size, iterations):
     # Apply dilation
     image_dilated = cv2.dilate(image, structure, iterations=iterations)
 
-    # Save the result
-    cv2.imwrite("seg_dialated.png", image_dilated)
+    # # Save the result
+    # cv2.imwrite("seg_dialated.png", image_dilated)
 
     # Convert to PIL Image
     image_pil = Image.fromarray(image_dilated)
