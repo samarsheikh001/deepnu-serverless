@@ -1,3 +1,4 @@
+import shutil
 from scripts.storage import download_file_from_bucket, upload_file_to_bucket
 from scripts.utils import CACHE_FOLDER, SD_MODEL, SEG_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
 from scripts.cloth_seg import get_clothes_mask
@@ -67,13 +68,13 @@ class Predictor():
     def base(self, x):
         return int(8 * math.floor(int(x)/8))
 
-    def predict(self, image, prompt, negative_prompt, scale_down_value=768, steps=25, seed=None):
+    def predict(self, image, prompt, negative_prompt, scale_down_value=768, steps=25, seed=None, dilate_value=5):
         if (seed == 0) or (seed == None):
             seed = int.from_bytes(os.urandom(2), byteorder='big')
         generator = torch.Generator('cuda').manual_seed(seed)
         print("Using seed:", seed)
         r_image = self.scale_down_image(image, scale_down_value)
-        r_mask = dilate_mask(get_clothes_mask(r_image), 15, 1)
+        r_mask = dilate_mask(get_clothes_mask(r_image), dilate_value, 1)
         width, height = r_image.size
         image = self.pipe(
             prompt=prompt,
@@ -89,16 +90,35 @@ class Predictor():
         return image
 
 
-image_path = "do.jpeg"
 prompt = "RAW photo of a nude woman, naked, <lora:UberRealVag_LORA_V1.0:0.7> <lora:UberDatAss_LORA_V1.0:0.7> <lora:UberVag_LORA_V1.0:0.5>"
 negative_prompt = "((clothing)), (monochrome:1.3), (deformed, distorted, disfigured:1.3), (hair), jeans, tattoo, wet, water, clothing, shadow, 3d render, cartoon, ((blurry)), duplicate, ((duplicate body parts)), (disfigured), (poorly drawn), ((missing limbs)), logo, signature, text, words, low res, boring, artifacts, bad art, gross, ugly, poor quality, low quality, poorly drawn, bad anatomy, wrong anatomy"
 steps = 20
 seed = None  # or you can specify a seed
 scale_down_value = 512
+dilate_value = 15
 
 pred = Predictor()
-image = Image.open(image_path)
-out_img = pred.predict(image, prompt,
-                       negative_prompt, scale_down_value, steps, seed)
 
-out_img.save("result.png")
+input_dir = "test_dump/inputs"
+output_dir = "test_dump/outputs/00"
+
+# Iterate over all the files in input_dir
+for filename in os.listdir(input_dir):
+    # If the file is an image
+    if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+        # Get the full path of the input image
+        input_image_path = os.path.join(input_dir, filename)
+
+        # Process the image
+        image = Image.open(input_image_path)
+        out_img = pred.predict(image, prompt,
+                               negative_prompt, scale_down_value, steps, seed, dilate_value)
+
+        # Get the full path of the output image
+
+        os.makedirs(output_dir, exist_ok=True)
+        output_image_path = os.path.join(output_dir, filename)
+        out_img.save(output_image_path)
+
+        # Save the processed image to the output directory
+        # shutil.copy(input_image_path, output_image_path)  # Uncomment this line if you want to copy the im

@@ -23,6 +23,7 @@ class ImageUrl(BaseModel):
     scale_down_value: Optional[int] = 512
     steps: Optional[int] = 25
     seed: Optional[int] = None
+    dilate_value = Optional[int] = 5
 
 
 pred = Predictor()
@@ -37,11 +38,12 @@ async def process_image(image_data: ImageUrl) -> Dict[str, str]:
         scale_down_value = image_data.scale_down_value
         steps = image_data.steps
         seed = image_data.seed
+        dilate_value = image_data.dilate_value
 
         image = download_image(img_url)
 
         out_img = pred.predict(image, prompt,
-                               negative_prompt, scale_down_value, steps, seed)
+                               negative_prompt, scale_down_value, steps, seed, dilate_value)
 
         # Convert your image into bytes
         byte_arr = BytesIO()

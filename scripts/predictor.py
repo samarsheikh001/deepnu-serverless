@@ -1,5 +1,5 @@
 from scripts.utils import CACHE_FOLDER, SD_MODEL, SEG_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
-from scripts.cloth_seg import get_clothes_mask
+from scripts.cloth_seg import generate_mask, get_clothes_mask, get_palette, load_seg_model
 from diffusers import StableDiffusionInpaintPipeline
 import torch
 import math
@@ -56,13 +56,13 @@ class Predictor():
     def base(self, x):
         return int(8 * math.floor(int(x)/8))
 
-    def predict(self, image, prompt, negative_prompt, scale_down_value=768, steps=25, seed=None):
+    def predict(self, image, prompt, negative_prompt, scale_down_value=768, steps=25, seed=None, dilate_value=5):
         if (seed == 0) or (seed == None):
             seed = int.from_bytes(os.urandom(2), byteorder='big')
         generator = torch.Generator('cuda').manual_seed(seed)
         print("Using seed:", seed)
         r_image = self.scale_down_image(image, scale_down_value)
-        r_mask = dilate_mask(get_clothes_mask(r_image), 30, 1)
+        r_mask = dilate_mask(get_clothes_mask(r_image), dilate_value, 1)
         width, height = r_image.size
         image = self.pipe(
             prompt=prompt,
