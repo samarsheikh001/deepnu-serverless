@@ -14,17 +14,24 @@ load_dotenv()
 
 
 CACHE_FOLDER = "cache"
+
+MODEL_BUCKET_NAME = "models"
+
 SEG_MODEL = "cloth_segm.pth"
 SD_MODEL = "uber_inpainting.safetensors"
 UberVag_LORA = "UberVag_LORA_V1.0.safetensors"
 UberDatAss_LORA = "UberDatAss_LORA_V1.0.safetensors"
 UberRealVag_LORA = "UberRealVag_LORA_V1.0.safetensors"
 
+GROUNDINO_MODEL = "groundingdino_swint_ogc.pth"
+SAM_MODEL = "sam_vit_h.pth"
+
 
 def ensure_model_exists(model_name):
     model_path = os.path.join(CACHE_FOLDER, model_name)
     if not os.path.exists(model_path):
-        download_file_from_bucket(model_name, model_path, bucket_name="models")
+        download_file_from_bucket(
+            model_name, model_path, bucket_name=MODEL_BUCKET_NAME)
 
 
 def download_image(url):

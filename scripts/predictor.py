@@ -1,4 +1,5 @@
-from scripts.utils import CACHE_FOLDER, SD_MODEL, SEG_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
+from scripts.dino_seg import ImageMasker
+from scripts.utils import CACHE_FOLDER, GROUNDINO_MODEL, SAM_MODEL, SD_MODEL, SEG_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
 from scripts.cloth_seg import generate_mask, get_clothes_mask, get_palette, load_seg_model
 from diffusers import StableDiffusionInpaintPipeline
 import torch
@@ -8,6 +9,8 @@ from dotenv import load_dotenv
 # from scripts.storage import upload_image
 load_dotenv()
 
+DINO_CONFIG = 'config/dino_config.py'
+
 
 class Predictor():
     def __init__(self):
@@ -15,12 +18,14 @@ class Predictor():
 
     def setup(self):
         os.makedirs(CACHE_FOLDER, exist_ok=True)
-        # Ensure SEG_MODEL and SD_MODEL_CACHE exist
+        # Ensure models exist
         ensure_model_exists(SEG_MODEL)
         ensure_model_exists(SD_MODEL)
         ensure_model_exists(UberVag_LORA)
         ensure_model_exists(UberDatAss_LORA)
         ensure_model_exists(UberRealVag_LORA)
+        ensure_model_exists(SAM_MODEL)
+        ensure_model_exists(GROUNDINO_MODEL)
 
         pipe = StableDiffusionInpaintPipeline.from_single_file(
             f"{CACHE_FOLDER}/{SD_MODEL}",
@@ -31,6 +36,17 @@ class Predictor():
         pipe.safety_checker = None
         # pipe.enable_attention_slicing()
         self.pipe = pipe.to("cuda")
+
+        self.processor = ImageMasker(
+            config_file=DINO_CONFIG,
+            grounded_checkpoint=f'{CACHE_FOLDER}/{GROUNDINO_MODEL}',
+            sam_checkpoint=f'{CACHE_FOLDER}/{SAM_MODEL}',
+            device="cuda",
+            box_threshold=0.3,
+            text_threshold=0.25,
+            use_sam_hq=False,
+            sam_hq_checkpoint=None
+        )
 
     def scale_down_image(self, image, max_size):
         width, height = image.size
@@ -62,7 +78,9 @@ class Predictor():
         generator = torch.Generator('cuda').manual_seed(seed)
         print("Using seed:", seed)
         r_image = self.scale_down_image(image, scale_down_value)
-        r_mask = dilate_mask(get_clothes_mask(r_image), dilate_value, 1)
+        # r_mask = dilate_mask(get_clothes_mask(r_image), dilate_value, 1)
+        r_mask = dilate_mask(self.processor.process_image(
+            r_image, 'cloth . dress . bra . panty'), dilate_value, 1)
         width, height = r_image.size
         image = self.pipe(
             prompt=prompt,
