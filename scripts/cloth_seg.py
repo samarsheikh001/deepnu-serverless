@@ -210,7 +210,7 @@ def get_clothes_mask(img):
     device = 'cuda:0'
 
     # Create an instance of your model
-    model = load_seg_model('model/cloth_segm.pth', device=device)
+    model = load_seg_model('cache/cloth_segm.pth', device=device)
 
     palette = get_palette(4)
 
