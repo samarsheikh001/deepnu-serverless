@@ -23,7 +23,7 @@ class ImageUrl(BaseModel):
     scale_down_value: Optional[int] = 512
     steps: Optional[int] = 25
     seed: Optional[int] = None
-    dilate_value = Optional[int] = 5
+    dilate_value: Optional[int] = 5
 
 
 pred = Predictor()
