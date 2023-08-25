@@ -1,5 +1,6 @@
 import shutil
 from scripts.dino_seg import ImageMasker
+from scripts.predictor import DINO_CONFIG
 from scripts.storage import download_file_from_bucket, upload_file_to_bucket
 from scripts.utils import CACHE_FOLDER, MODEL_BUCKET_NAME, SD_MODEL, SEG_MODEL, SAM_MODEL, GROUNDINO_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
 from scripts.cloth_seg import get_clothes_mask
@@ -48,9 +49,9 @@ class Predictor():
         self.pipe = pipe.to("cuda")
 
         self.processor = ImageMasker(
-            config_file='config/dino_config.py',
-            grounded_checkpoint='cache/groundingdino_swint_ogc.pth',
-            sam_checkpoint='cache/sam_vit_h.pth',
+            config_file=DINO_CONFIG,
+            grounded_checkpoint=f'{CACHE_FOLDER}/{GROUNDINO_MODEL}',
+            sam_checkpoint=f'{CACHE_FOLDER}/{SAM_MODEL}',
             device="cuda",
             box_threshold=0.3,
             text_threshold=0.25,

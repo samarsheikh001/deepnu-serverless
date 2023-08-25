@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:latest
+FROM nvidia/cuda:11.7.0-base-ubuntu20.04
 
 WORKDIR /app
 
