@@ -13,4 +13,3 @@ boto3
 runpod
 fastapi
 uvicorn
-segment-anything
