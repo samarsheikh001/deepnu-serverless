@@ -13,6 +13,4 @@ boto3
 runpod
 fastapi
 uvicorn
-git+https://github.com/IDEA-Research/GroundingDINO.git
 segment-anything
-cPython
