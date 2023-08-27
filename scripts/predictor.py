@@ -2,6 +2,7 @@ from scripts.dino_seg import ImageMasker
 from scripts.utils import CACHE_FOLDER, GROUNDINO_MODEL, SAM_MODEL, SD_MODEL, SEG_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
 from scripts.cloth_seg import generate_mask, get_clothes_mask, get_palette, load_seg_model
 from diffusers import StableDiffusionInpaintPipeline
+from diffusers.models import AutoencoderKL
 import torch
 import math
 import os
