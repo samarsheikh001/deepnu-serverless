@@ -4,3 +4,6 @@ docker build --no-cache -t getrektx/deepless:latest .
 
 pip install git+https://github.com/IDEA-Research/GroundingDINO.git
 pip install segment-anything
+
+# resolution
+pip install git+https://github.com/sberbank-ai/Real-ESRGAN.git

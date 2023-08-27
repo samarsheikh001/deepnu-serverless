@@ -1,4 +1,5 @@
 from scripts.dino_seg import ImageMasker
+from scripts.upscaler import ImageUpscaler
 from scripts.utils import CACHE_FOLDER, GROUNDINO_MODEL, SAM_MODEL, SD_MODEL, SEG_MODEL, UberDatAss_LORA, UberRealVag_LORA, UberVag_LORA, dilate_mask, ensure_model_exists
 from scripts.cloth_seg import generate_mask, get_clothes_mask, get_palette, load_seg_model
 from diffusers import StableDiffusionInpaintPipeline
@@ -55,6 +56,9 @@ class Predictor():
             sam_hq_checkpoint=None
         )
 
+        self.upscaler = ImageUpscaler(
+            scale=2, model_path="cache/RealESRGAN_x2.pth")
+
     def scale_down_image(self, image, max_size):
         width, height = image.size
         scaling_factor = min(max_size/width, max_size/height)
@@ -79,7 +83,7 @@ class Predictor():
     def base(self, x):
         return int(8 * math.floor(int(x)/8))
 
-    def predict(self, image, prompt, negative_prompt, remove_mask_prompt, scale_down_value=768, steps=25, seed=None, dilate_value=5):
+    def predict(self, image, prompt, negative_prompt, remove_mask_prompt, scale_down_value=768, steps=25, seed=None, dilate_value=5, should_upscale=True):
         if (seed == 0) or (seed == None):
             seed = int.from_bytes(os.urandom(2), byteorder='big')
         generator = torch.Generator('cuda').manual_seed(seed)
@@ -99,5 +103,6 @@ class Predictor():
             num_inference_steps=steps,
             generator=generator,
         ).images[0]
-
+        if should_upscale:
+            image = self.upscaler.upscale(image)
         return image

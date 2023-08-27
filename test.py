@@ -1,6 +1,8 @@
+import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 from diffusers.utils import load_image
-from diffusers import StableDiffusionControlNetInpaintPipeline, ControlNetModel
+from diffusers import StableDiffusionControlNetInpaintPipeline, ControlNetModel, UniPCMultistepScheduler
 import shutil
 from scripts.dino_seg import ImageMasker
 from scripts.predictor import DINO_CONFIG, Predictor
@@ -29,14 +31,15 @@ load_dotenv()
 
 prompt = "RAW photo of a nude woman, naked, <lora:UberRealVag_LORA_V1.0:0.7> <lora:UberDatAss_LORA_V1.0:0.7> <lora:UberVag_LORA_V1.0:0.5>"
 negative_prompt = "((clothing)), (monochrome:1.3), (deformed, distorted, disfigured:1.3), (hair), jeans, tattoo, wet, water, clothing, shadow, 3d render, cartoon, ((blurry)), duplicate, ((duplicate body parts)), (disfigured), (poorly drawn), ((missing limbs)), logo, signature, text, words, low res, boring, artifacts, bad art, gross, ugly, poor quality, low quality, poorly drawn, bad anatomy, wrong anatomy"
+remove_mask_prompt = "woman"
 steps = 30
 seed = None  # or you can specify a seed
 scale_down_value = 512
 dilate_value = 15
 
 
-input_dir = "dump/inputs/square"
-output_dir = "dump/outputs/res"
+# input_dir = "dump/inputs/square"
+# output_dir = "dump/outputs/res"
 
 # pred = Predictor()
 # # Iterate over all the files in input_dir
@@ -49,7 +52,7 @@ output_dir = "dump/outputs/res"
 #         # Process the image
 #         image = Image.open(input_image_path)
 #         out_img = pred.predict(image, prompt,
-#                                negative_prompt, scale_down_value, steps, seed, dilate_value)
+#                                negative_prompt, remove_mask_prompt, scale_down_value, steps, seed, dilate_value)
 
 #         # Get the full path of the output image
 #         os.makedirs(output_dir, exist_ok=True)
@@ -62,7 +65,7 @@ output_dir = "dump/outputs/res"
 
 
 # # Create an instance of the ImageProcessor class
-# processor = ImageMasker(
+# mask_processor = ImageMasker(
 #     config_file='config/dino_config.py',
 #     grounded_checkpoint='cache/groundingdino_swint_ogc.pth',
 #     sam_checkpoint='cache/sam_vit_h.pth',
@@ -73,7 +76,7 @@ output_dir = "dump/outputs/res"
 #     sam_hq_checkpoint=None
 # )
 
-# single_img = Image.open("dump/inputs/pexels/pexels-andres-daza-17240563.jpg")
+# single_img = Image.open("dump/inputs/square/a.jpg")
 # single_img.save('dump/image.png')
 # # Then, use the instance to process an image with a text prompt
 # sam_masked_image = processor.process_image(
@@ -88,57 +91,3 @@ output_dir = "dump/outputs/res"
 
 # d_unet_masked_image = dilate_mask(unet_masked_image, 15, 1)
 # d_unet_masked_image.save('dump/d_unet_mask.png')
-
-
-# !pip install transformers accelerate
-
-init_image = load_image(
-    "https://huggingface.co/datasets/diffusers/test-arrays/resolve/main/stable_diffusion_inpaint/boy.png"
-)
-init_image = init_image.resize((512, 512))
-
-generator = torch.Generator(device="cpu").manual_seed(1)
-
-mask_image = load_image(
-    "https://huggingface.co/datasets/diffusers/test-arrays/resolve/main/stable_diffusion_inpaint/boy_mask.png"
-)
-mask_image = mask_image.resize((512, 512))
-
-
-def make_inpaint_condition(image, image_mask):
-    image = np.array(image.convert("RGB")).astype(np.float32) / 255.0
-    image_mask = np.array(image_mask.convert("L")).astype(np.float32) / 255.0
-
-    assert image.shape[0:1] == image_mask.shape[0:
-                                                1], "image and image_mask must have the same image size"
-    image[image_mask > 0.5] = -1.0  # set as masked pixel
-    image = np.expand_dims(image, 0).transpose(0, 3, 1, 2)
-    image = torch.from_numpy(image)
-    return image
-
-
-control_image = make_inpaint_condition(init_image, mask_image)
-
-controlnet = ControlNetModel.from_pretrained(
-    "lllyasviel/control_v11p_sd15_inpaint", torch_dtype=torch.float16,
-    cache_dir="cache/controlnet"
-)
-pipe = StableDiffusionControlNetInpaintPipeline.from_single_file(
-    f"{CACHE_FOLDER}/{SD_MODEL}", controlnet=controlnet, torch_dtype=torch.float16
-)
-
-pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
-pipe.enable_model_cpu_offload()
-
-# generate image
-image = pipe(
-    "a handsome man with ray-ban sunglasses",
-    num_inference_steps=20,
-    generator=generator,
-    eta=1.0,
-    image=init_image,
-    mask_image=mask_image,
-    control_image=control_image,
-).images[0]
-
-image.save("result.png")

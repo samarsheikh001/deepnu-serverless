@@ -16,3 +16,4 @@ uvicorn
 segment_anything
 python-dotenv
 git+https://github.com/IDEA-Research/GroundingDINO.git
+huggingface_hub
