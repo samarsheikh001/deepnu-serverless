@@ -10,6 +10,9 @@ rembg[gpu]
 omegaconf
 gdown
 boto3
-runpod
 fastapi
+runpod
 uvicorn
+segment_anything
+python-dotenv
+git+https://github.com/IDEA-Research/GroundingDINO.git

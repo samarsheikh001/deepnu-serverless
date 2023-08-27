@@ -24,6 +24,7 @@ class ImageUrl(BaseModel):
     steps: Optional[int] = 25
     seed: Optional[int] = None
     dilate_value: Optional[int] = 5
+    remove_mask_prompt: Optional[str] = 'cloth . dress . bra . panty'
 
 
 pred = Predictor()
@@ -39,11 +40,12 @@ async def process_image(image_data: ImageUrl) -> Dict[str, str]:
         steps = image_data.steps
         seed = image_data.seed
         dilate_value = image_data.dilate_value
+        remove_mask_prompt = image_data.remove_mask_prompt
 
         image = download_image(img_url)
 
         out_img = pred.predict(image, prompt,
-                               negative_prompt, scale_down_value, steps, seed, dilate_value)
+                               negative_prompt, remove_mask_prompt, scale_down_value, steps, seed, dilate_value)
 
         # Convert your image into bytes
         byte_arr = BytesIO()
