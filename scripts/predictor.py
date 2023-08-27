@@ -28,16 +28,16 @@ class Predictor():
         ensure_model_exists(SAM_MODEL)
         ensure_model_exists(GROUNDINO_MODEL)
 
-        url = "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/blob/main/vae-ft-mse-840000-ema-pruned.safetensors"
-        vae = AutoencoderKL.from_single_file(
-            url,
-        )
+        # url = "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/blob/main/vae-ft-mse-840000-ema-pruned.safetensors"
+        # vae = AutoencoderKL.from_single_file(
+        #     url,
+        # )
 
         pipe = StableDiffusionInpaintPipeline.from_single_file(
             f"{CACHE_FOLDER}/{SD_MODEL}",
             revision="fp16",
             torch_dtype=torch.float16,
-            vae=vae,
+            # vae=vae,
         )
 
         pipe.safety_checker = None
