@@ -46,7 +46,6 @@ async def process_image(image_data: ImageUrl) -> Dict[str, str]:
 
         out_img = pred.predict(image, prompt,
                                negative_prompt, remove_mask_prompt, scale_down_value, steps, seed, dilate_value)
-
         # Convert your image into bytes
         byte_arr = BytesIO()
         out_img.save(byte_arr, format='PNG')

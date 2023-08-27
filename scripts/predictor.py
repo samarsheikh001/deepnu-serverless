@@ -79,7 +79,7 @@ class Predictor():
     def base(self, x):
         return int(8 * math.floor(int(x)/8))
 
-    def predict(self, image, prompt, negative_prompt, scale_down_value=768, steps=25, seed=None, dilate_value=5):
+    def predict(self, image, prompt, negative_prompt, remove_mask_prompt, scale_down_value=768, steps=25, seed=None, dilate_value=5):
         if (seed == 0) or (seed == None):
             seed = int.from_bytes(os.urandom(2), byteorder='big')
         generator = torch.Generator('cuda').manual_seed(seed)
@@ -87,7 +87,7 @@ class Predictor():
         r_image = self.scale_down_image(image, scale_down_value)
         # r_mask = dilate_mask(get_clothes_mask(r_image), dilate_value, 1)
         r_mask = dilate_mask(self.processor.process_image(
-            r_image, 'cloth . dress . bra . panty'), dilate_value, 1)
+            r_image, remove_mask_prompt), dilate_value, 1)
         width, height = r_image.size
         image = self.pipe(
             prompt=prompt,
