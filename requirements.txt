@@ -16,4 +16,5 @@ uvicorn
 segment_anything
 python-dotenv
 git+https://github.com/IDEA-Research/GroundingDINO.git
+git+https://github.com/sberbank-ai/Real-ESRGAN.git
 huggingface_hub

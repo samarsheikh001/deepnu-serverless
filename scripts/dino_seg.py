@@ -104,8 +104,8 @@ class ImageMasker:
         return boxes_filt, pred_phrases
 
     def process_image(self, image_pil, text_prompt):
-        os.makedirs(self.output_dir, exist_ok=True)
-        image_pil.save(os.path.join(self.output_dir, "raw_image.jpg"))
+        # os.makedirs(self.output_dir, exist_ok=True)
+        # image_pil.save(os.path.join(self.output_dir, "raw_image.jpg"))
         transform = T.Compose(
             [
                 T.RandomResize([800], max_size=1333),
